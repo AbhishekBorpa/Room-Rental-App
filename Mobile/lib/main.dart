@@ -3,15 +3,16 @@ import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
 import 'screens/login_screen.dart';
 import 'screens/main_scaffold.dart';
-import 'screens/home_screen.dart';
 import 'services/api_service.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  
   runApp(const RoomRentalApp());
 }
 
 class RoomRentalApp extends StatelessWidget {
-  const RoomRentalApp({Key? key}) : super(key: key);
+  const RoomRentalApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +29,7 @@ class RoomRentalApp extends StatelessWidget {
 }
 
 class AuthWrapper extends StatefulWidget {
-  const AuthWrapper({Key? key}) : super(key: key);
+  const AuthWrapper({super.key});
 
   @override
   State<AuthWrapper> createState() => _AuthWrapperState();
@@ -38,17 +39,20 @@ class _AuthWrapperState extends State<AuthWrapper> {
   final ApiService _apiService = ApiService();
   bool _isLoading = true;
   bool _hasToken = false;
+  String _role = 'tenant';
 
   @override
   void initState() {
     super.initState();
-    _checkToken();
+    _checkAuth();
   }
 
-  Future<void> _checkToken() async {
+  Future<void> _checkAuth() async {
     final token = await _apiService.getToken();
+    final role = await _apiService.getUserRole();
     setState(() {
       _hasToken = token != null && token.isNotEmpty;
+      _role = role;
       _isLoading = false;
     });
   }
@@ -60,6 +64,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
         body: Center(child: CircularProgressIndicator()),
       );
     }
-    return _hasToken ? const MainScaffold() : const LoginScreen();
+    return _hasToken ? MainScaffold(role: _role) : const LoginScreen();
   }
 }

@@ -20,6 +20,8 @@ const roomSchema = new mongoose.Schema({
     genderPreference: { type: String, enum: ['male', 'female', 'any'], default: 'any' },
     bachelorsAllowed: { type: Boolean, default: true },
     nearMetro: { type: Boolean, default: false },
+    latitude: { type: Number },
+    longitude: { type: Number },
     images: [String],   // array of image URLs or base64
     ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     createdAt: { type: Date, default: Date.now }

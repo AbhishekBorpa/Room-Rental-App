@@ -15,6 +15,8 @@ class Room {
   final String genderPreference;
   final bool bachelorsAllowed;
   final bool nearMetro;
+  final double? latitude;
+  final double? longitude;
   final List<String> images;
   final dynamic ownerId;
 
@@ -35,6 +37,8 @@ class Room {
     required this.genderPreference,
     required this.bachelorsAllowed,
     required this.nearMetro,
+    this.latitude,
+    this.longitude,
     required this.images,
     this.ownerId,
   });
@@ -57,6 +61,8 @@ class Room {
       genderPreference: json['genderPreference'] ?? 'any',
       bachelorsAllowed: json['bachelorsAllowed'] ?? true,
       nearMetro: json['nearMetro'] ?? false,
+      latitude: json['latitude'] != null ? (json['latitude'] as num).toDouble() : null,
+      longitude: json['longitude'] != null ? (json['longitude'] as num).toDouble() : null,
       images: json['images'] != null ? List<String>.from(json['images']) : [],
       ownerId: json['ownerId'],
     );

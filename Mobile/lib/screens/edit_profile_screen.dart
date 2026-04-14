@@ -4,7 +4,7 @@ import '../services/api_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final User user;
-  const EditProfileScreen({Key? key, required this.user}) : super(key: key);
+  const EditProfileScreen({super.key, required this.user});
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
@@ -32,9 +32,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     setState(() => _isLoading = false);
     
     if (success) {
-      if(mounted) Navigator.pop(context);
+      if (mounted) {
+        Navigator.pop(context, true);
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to update')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to update profile')));
+      }
     }
   }
 

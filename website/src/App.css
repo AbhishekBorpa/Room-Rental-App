@@ -1,0 +1,61 @@
+/* Admin Portal Styles */
+
+.portal-input:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+}
+
+.loader {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.loader::after {
+  content: "";
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--primary);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spinner 0.8s linear infinite;
+}
+
+@keyframes spinner {
+  to { transform: rotate(360deg); }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Table Hover Effects */
+tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Card Transitions */
+.premium-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}

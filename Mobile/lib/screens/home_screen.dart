@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import '../models/room.dart';
 import '../services/api_service.dart';
 import '../widgets/room_card.dart';
+import '../widgets/shimmer_card.dart';
 import '../theme/app_theme.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'room_detail_screen.dart';
+import '../widgets/filter_sheet.dart';
+import 'dart:async';
+import 'room_map_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -20,6 +24,10 @@ class _HomeScreenState extends State<HomeScreen> {
   String _selectedCity = 'All';
 
   final List<String> _cities = ['All', 'Mumbai', 'Delhi', 'Bangalore', 'Pune', 'Hyderabad'];
+  
+  final TextEditingController _searchCtrl = TextEditingController();
+  Timer? _debounce;
+  Map<String, String> _advancedFilters = {};
 
   @override
   void initState() {
@@ -30,25 +38,74 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _fetchRooms() async {
     setState(() => _isLoading = true);
     try {
+      // Combine all filters
+      Map<String, String> consolidatedFilters = {..._advancedFilters};
+      
+      if (_selectedCity != 'All') {
+        consolidatedFilters['city'] = _selectedCity;
+      }
+      
+      if (_searchCtrl.text.isNotEmpty) {
+        consolidatedFilters['search'] = _searchCtrl.text;
+      }
+
       final rooms = await _apiService.getRooms(
-        filters: _selectedCity != 'All' ? {'city': _selectedCity} : null,
+        filters: consolidatedFilters.isEmpty ? null : consolidatedFilters,
       );
       setState(() {
         _rooms = rooms;
       });
     } catch (e) {
-      // Handle error gracefully
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to load rooms')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to load rooms')),
+        );
+      }
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      _fetchRooms();
+    });
+  }
+
+  void _showFilterSheet() async {
+    final result = await showModalBottomSheet<Map<String, String>>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => FilterSheet(initialFilters: _advancedFilters),
+    );
+
+    if (result != null) {
+      setState(() {
+        _advancedFilters = result;
+      });
+      _fetchRooms();
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RoomMapScreen())),
+        label: const Text('Map View'),
+        icon: const Icon(Icons.map_outlined),
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: Colors.white,
+      ).animate().scale(delay: 600.ms),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   CircleAvatar(
                     radius: 24,
-                    backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
+                    backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
                     child: const Icon(Icons.person, color: AppTheme.primaryColor),
                   )
                 ],
@@ -99,37 +156,46 @@ class _HomeScreenState extends State<HomeScreen> {
                         border: Border.all(color: Colors.grey[200]!),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.02),
+                            color: Colors.black.withValues(alpha: 0.02),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           )
                         ]
                       ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.search, color: AppTheme.textMuted),
-                          const SizedBox(width: 12),
-                          Text('Search locality...', style: TextStyle(color: AppTheme.textMuted)),
-                        ],
+                      child: TextField(
+                        controller: _searchCtrl,
+                        onChanged: _onSearchChanged,
+                        decoration: const InputDecoration(
+                          hintText: 'Search locality or title...',
+                          hintStyle: TextStyle(color: AppTheme.textMuted),
+                          prefixIcon: Icon(Icons.search, color: AppTheme.textMuted),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(vertical: 15),
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 16),
-                  Container(
-                    height: 54,
-                    width: 54,
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryColor,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.primaryColor.withOpacity(0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        )
-                      ]
+                  GestureDetector(
+                    onTap: _showFilterSheet,
+                    child: Container(
+                      height: 54,
+                      width: 54,
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.primaryColor.withValues(alpha: 0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          )
+                        ]
+                      ),
+                      child: const Icon(Icons.tune, color: Colors.white),
                     ),
-                    child: const Icon(Icons.tune, color: Colors.white),
                   ),
                 ],
               ),
@@ -181,12 +247,23 @@ class _HomeScreenState extends State<HomeScreen> {
             // Rooms List
             Expanded(
               child: _isLoading 
-                ? const Center(child: CircularProgressIndicator())
+                ? ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    itemCount: 3,
+                    itemBuilder: (context, index) => const ShimmerCard(),
+                  )
                 : _rooms.isEmpty
                     ? Center(
-                        child: Text(
-                          'No rooms found in \$_selectedCity',
-                          style: Theme.of(context).textTheme.bodyLarge,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.search_off, size: 80, color: Colors.grey[300]),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No rooms found',
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.textMuted),
+                            ),
+                          ],
                         ),
                       )
                     : ListView.builder(

@@ -66,5 +66,15 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app needs access to location when open to show nearby rooms.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>This app needs access to location to show nearby rooms.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>This app needs access to location to show nearby rooms.</string>
+    <key>MapplsSDKClientId</key>
+    <string>96dHZVzsAuvKUqHXJOxOzxlseA1XIXlaF1dEGs7GKugf2qjhS8xfPsTwwZJ3_092qHhzW_OwHVu5JB808b8qOg==</string>
+    <key>MapplsSDKClientSecret</key>
+    <string>lrFxI-iSEg8jzx4Rcn5mXJs4zpu_AGWYUEocvvmZdPCAAsbCjblCMrjZyIBOx0kVNzh1yyX1JTv-Hae2KeA1ek0JlBA41etM</string>
 </dict>
 </plist>

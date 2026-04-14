@@ -3,7 +3,7 @@ import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 
 class MyBookingsScreen extends StatefulWidget {
-  const MyBookingsScreen({Key? key}) : super(key: key);
+  const MyBookingsScreen({super.key});
 
   @override
   State<MyBookingsScreen> createState() => _MyBookingsScreenState();
@@ -51,14 +51,14 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 8),
-                        Text("Move in: \${b['startDate']?.split('T')[0] ?? 'N/A'}"),
-                        Text("Status: \${(b['status'] ?? '').toUpperCase()}", style: TextStyle(
+                        Text("Move in: ${b['startDate']?.split('T')[0] ?? 'N/A'}"),
+                        Text("Status: ${(b['status'] ?? '').toUpperCase()}", style: TextStyle(
                           color: b['status'] == 'pending' ? Colors.orange : AppTheme.secondaryColor,
                           fontWeight: FontWeight.bold
                         )),
                       ],
                     ),
-                    trailing: Text("₹\${b['amount']}"),
+                    trailing: Text("₹${b['amount']}"),
                   ),
                 );
               },
